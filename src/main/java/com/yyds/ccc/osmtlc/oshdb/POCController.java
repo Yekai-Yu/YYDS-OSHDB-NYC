@@ -41,8 +41,8 @@ public class POCController {
 
     Logger logger = LoggerFactory.getLogger(POCController.class);
 
-    private static String DIR = "/home/ec2-user";
-//    private static String DIR = "/Users/yekaiyu/Desktop/CS 598 Cloud Computing Capstone/Research Project/Main";
+//    private static String DIR = "/home/ec2-user";
+    private static String DIR = "/Users/yekaiyu/Desktop/CS 598 Cloud Computing Capstone/Research Project/Main";
     private static String DB_PATH = DIR + "/us_2021-01-06.oshdb.mv.db";
     private static String GEOJSON_PATH = DIR + "/NYC Taxi Zones.geojson";
 
@@ -80,10 +80,12 @@ public class POCController {
     @RequestMapping(value = "test", method = RequestMethod.GET)
     public void poc() {
         logger.info("Hit");
+        System.out.println("Hit");
         Map<String, Object> geometryMap = null;
         MapReducer<OSMEntitySnapshot> view = null;
         TagTranslator tagTranslator = null;
-        List<ZoneTagData> allTimeZoneTagData = new ArrayList<>();
+        List<ZoneTagData> allTimeZoneTagWayData = new ArrayList<>();
+        List<ZoneTagData> allTimeZoneTagNodeData = new ArrayList<>();
         try {
             logger.info("Init DB");
             oshdb = new OSHDBH2(DB_PATH);
@@ -127,49 +129,81 @@ public class POCController {
 
                 // one zone, at one time
                 LocalDate start = LocalDate.of(2014, 1, 1);
-                LocalDate end = LocalDate.of(2020, 12, 31);
-//                LocalDate end = LocalDate.of(2014, 1, 15);
+//                LocalDate end = LocalDate.of(2020, 12, 31);
+                LocalDate end = LocalDate.of(2014, 1, 15);
 
                 Stream<LocalDate> dates = start.datesUntil(end.plusDays(1), Period.ofMonths(1));
                 List<String> dateList = dates.map(LocalDate::toString).collect(Collectors.toList());
 
                 MapReducer<OSMEntitySnapshot> finalView = finalView1;
                 TagTranslator finalTagTranslator = finalTagTranslator1;
-                List<ZoneTagData> currentZone = new ArrayList<>();
+                List<ZoneTagData> currentZoneWay = new ArrayList<>();
+                List<ZoneTagData> currentZoneNode = new ArrayList<>();
                 dateList.parallelStream().forEach(time -> {
-                            logger.info("Processing time: {}", time);
-                            ZoneTagData zoneTagData = new ZoneTagData(g.getZone(), g.getBorough(), g.getLocationId());
-                            zoneTagData.setTimestamp(time);
-                            try {
-                                finalView.areaOfInterest(geometryJTS)
-                                        .timestamps(time)
-                                        .osmType(OSMType.WAY, OSMType.NODE)
-                                        .forEach(snapshot -> {
-                                            Iterable<OSHDBTag> tagList = snapshot.getEntity().getTags();
-                                            tagList.forEach(tag -> {
-                                                aggTag(tag, finalTagTranslator, zoneTagData, snapshot);
-                                            });
-                                        });
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            currentZone.add(zoneTagData);
-                        }
+                    logger.info("Processing time: {}", time);
+                    ZoneTagData zoneTagWayData = new ZoneTagData(g.getZone(), g.getBorough(), g.getLocationId());
+                    zoneTagWayData.setTimestamp(time);
+                    try {
+                        finalView.areaOfInterest(geometryJTS)
+                                .timestamps(time)
+                                .osmType(OSMType.WAY)
+                                .forEach(snapshot -> {
+                                    Iterable<OSHDBTag> tagList = snapshot.getEntity().getTags();
+                                    tagList.forEach(tag -> {
+                                        aggTag(tag, finalTagTranslator, zoneTagWayData, snapshot, true);
+                                    });
+                                });
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    currentZoneWay.add(zoneTagWayData);
+
+                    ZoneTagData zoneTagNodeData = new ZoneTagData(g.getZone(), g.getBorough(), g.getLocationId());
+                    zoneTagNodeData.setTimestamp(time);
+                    try {
+                        finalView.areaOfInterest(geometryJTS)
+                                .timestamps(time)
+                                .osmType(OSMType.NODE)
+                                .forEach(snapshot -> {
+                                    Iterable<OSHDBTag> tagList = snapshot.getEntity().getTags();
+                                    tagList.forEach(tag -> {
+                                        aggTag(tag, finalTagTranslator, zoneTagNodeData, snapshot, false);
+                                    });
+                                });
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    currentZoneNode.add(zoneTagNodeData);
+                    }
                 );
-                allTimeZoneTagData.addAll(currentZone);
+                allTimeZoneTagWayData.addAll(currentZoneWay);
+                allTimeZoneTagNodeData.addAll(currentZoneNode);
             });
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println(allTimeZoneTagData.size());
+        System.out.println(allTimeZoneTagWayData.size());
+        System.out.println(allTimeZoneTagNodeData.size());
         Gson gson = new Gson();
-        String outputJson = gson.toJson(allTimeZoneTagData);
-        Set<OSMTag> allTimeTags = allTimeZoneTagData.stream().flatMap(zone -> zone.getTagSet().stream()).collect(Collectors.toSet());
-        String tagJson = gson.toJson(allTimeTags);
+        String outputWayJson = gson.toJson(allTimeZoneTagWayData);
+        String outputNodeJson = gson.toJson(allTimeZoneTagNodeData);
+        Set<OSMTag> allTimeWayTags = allTimeZoneTagWayData.stream().flatMap(zone -> zone.getTagSet().stream()).collect(Collectors.toSet());
+        Set<OSMTag> allTimeNodeTags = allTimeZoneTagWayData.stream().flatMap(zone -> zone.getTagSet().stream()).collect(Collectors.toSet());
+        Set<OSMTag> allTags = new HashSet<>(allTimeWayTags);
+        allTags.addAll(allTimeNodeTags);
+        String tagJson = gson.toJson(allTags);
         try {
-            FileWriter fileWriter = new FileWriter("2014-2020-allTimeZoneTagData.json");
-            fileWriter.write(outputJson);
+            FileWriter fileWriter = new FileWriter("2014-2020-allTimeZoneTagWayData.json");
+            fileWriter.write(outputWayJson);
+            fileWriter.close();
+        } catch (Exception e) {
+
+        }
+
+        try {
+            FileWriter fileWriter = new FileWriter("2014-2020-allTimeZoneTagNodeData.json");
+            fileWriter.write(outputNodeJson);
             fileWriter.close();
         } catch (Exception e) {
 
@@ -184,7 +218,7 @@ public class POCController {
         }
     }
 
-    private void aggTag(OSHDBTag tag, TagTranslator finalTagTranslator, ZoneTagData zoneTagData, OSMEntitySnapshot snapshot) {
+    private void aggTag(OSHDBTag tag, TagTranslator finalTagTranslator, ZoneTagData zoneTagData, OSMEntitySnapshot snapshot, boolean hasArea) {
         OSMTag osmTag = finalTagTranslator.getOSMTagOf(tag.getKey(), tag.getValue());
         // check tag - if char
         // many tags
@@ -195,14 +229,25 @@ public class POCController {
 
             Double area = snapshot.getGeometry().getArea();
             List<Double> areaList = zoneTagData.getFeatureMap().getOrDefault(osmTag.getValue(), new ArrayList<>());
-            // ignore area=0
-            if (area != 0) {
+            if (hasArea) {
+                // Way
+                // ignore area=0
+                if (area != 0) {
+                    if (areaList.isEmpty()) {
+                        areaList.add(1.0);
+                        areaList.add(area);
+                    } else {
+                        areaList.set(0, areaList.get(0) + 1.0);
+                        areaList.set(1, areaList.get(1) + area);
+                    }
+                    zoneTagData.getFeatureMap().put(osmTag.getValue(), areaList);
+                }
+            } else {
+                // Node
                 if (areaList.isEmpty()) {
                     areaList.add(1.0);
-                    areaList.add(area);
                 } else {
                     areaList.set(0, areaList.get(0) + 1.0);
-                    areaList.set(1, areaList.get(1) + area);
                 }
                 zoneTagData.getFeatureMap().put(osmTag.getValue(), areaList);
             }
