@@ -41,8 +41,8 @@ public class POCController {
 
     Logger logger = LoggerFactory.getLogger(POCController.class);
 
-//    private static String DIR = "/home/ec2-user";
-    private static String DIR = "/Users/yekaiyu/Desktop/CS 598 Cloud Computing Capstone/Research Project/Main";
+    private static String DIR = "/home/ec2-user";
+//    private static String DIR = "/Users/yekaiyu/Desktop/CS 598 Cloud Computing Capstone/Research Project/Main";
     private static String DB_PATH = DIR + "/us_2021-01-06.oshdb.mv.db";
     private static String GEOJSON_PATH = DIR + "/NYC Taxi Zones.geojson";
 
@@ -129,8 +129,8 @@ public class POCController {
 
                 // one zone, at one time
                 LocalDate start = LocalDate.of(2014, 1, 1);
-//                LocalDate end = LocalDate.of(2020, 12, 31);
-                LocalDate end = LocalDate.of(2014, 1, 15);
+                LocalDate end = LocalDate.of(2020, 12, 31);
+//                LocalDate end = LocalDate.of(2014, 1, 15);
 
                 Stream<LocalDate> dates = start.datesUntil(end.plusDays(1), Period.ofMonths(1));
                 List<String> dateList = dates.map(LocalDate::toString).collect(Collectors.toList());
