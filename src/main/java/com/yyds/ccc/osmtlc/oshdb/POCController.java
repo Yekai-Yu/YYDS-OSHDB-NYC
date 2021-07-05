@@ -116,6 +116,7 @@ public class POCController {
                         Integer.parseInt((String) properties.get("location_id")),
                         (String) geometry.get("type"),
                         coList.toArray(cArr));
+                logger.info("Processing zone: {}", g.getZone());
                 GeometryFactory geoFactory = new GeometryFactory();
                 Polygon geometryJTS = geoFactory.createPolygon(g.getCoordinates());
 
@@ -131,6 +132,7 @@ public class POCController {
                 TagTranslator finalTagTranslator = finalTagTranslator1;
                 List<ZoneTagData> currentZone = new ArrayList<>();
                 dateList.parallelStream().forEach(time -> {
+                            logger.info("Processing time: {}", time);
                             ZoneTagData zoneTagData = new ZoneTagData(g.getZone(), g.getBorough(), g.getLocationId());
                             zoneTagData.setTimestamp(time);
                             try {
