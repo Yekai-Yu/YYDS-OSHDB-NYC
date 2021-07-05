@@ -62,6 +62,7 @@ public class IgniteController extends POCController {
         cfg.setBinaryConfiguration((new BinaryConfiguration()).setCompactFooter(false));
         cfg.setGridLogger(new Slf4jLogger());
         cfg.setWorkDirectory("/tmp");
+        cfg.setClientMode(true);
 
         // Override default discovery SPI.
         cfg.setDiscoverySpi(spi);
