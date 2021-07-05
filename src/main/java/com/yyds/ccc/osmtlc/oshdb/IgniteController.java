@@ -50,7 +50,7 @@ public class IgniteController extends POCController {
 
         TcpDiscoveryS3IpFinder ipFinder = new TcpDiscoveryS3IpFinder();
         ipFinder.setAwsCredentials(creds);
-        ipFinder.setBucketName("oshdb-nyc");
+        ipFinder.setBucketName("ignite-bucket-ccc");
 
         spi.setIpFinder(ipFinder);
         IgniteConfiguration cfg = new IgniteConfiguration();
