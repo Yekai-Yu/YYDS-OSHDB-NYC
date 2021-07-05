@@ -87,7 +87,9 @@ public class POCController {
         try {
             logger.info("Init DB");
             oshdb = new OSHDBH2(DB_PATH);
+            logger.info("Init TagTranslator");
             tagTranslator = new TagTranslator(oshdb.getConnection());
+            logger.info("Init view");
             view = OSMEntitySnapshotView.on(oshdb);
         } catch (Exception e) {
             e.printStackTrace();
