@@ -27,7 +27,6 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -41,12 +40,12 @@ public class POCController {
 
     Logger logger = LoggerFactory.getLogger(POCController.class);
 
-    private static String DIR = "/home/ec2-user";
+    protected static String DIR = "/home/ec2-user";
 //    private static String DIR = "/Users/yekaiyu/Desktop/CS 598 Cloud Computing Capstone/Research Project/Main";
-    private static String DB_PATH = DIR + "/us_2021-01-06.oshdb.mv.db";
-    private static String GEOJSON_PATH = DIR + "/NYC Taxi Zones.geojson";
+    protected static String DB_PATH = DIR + "/us_2021-01-06.oshdb.mv.db";
+    protected static String GEOJSON_PATH = DIR + "/NYC Taxi Zones.geojson";
 
-    private static Set<String> PRIMARY_FEATURES = new HashSet<>() {{
+    protected static Set<String> PRIMARY_FEATURES = new HashSet<>() {{
         add("amenity");
         add("aeroway");
         add("building");
@@ -60,7 +59,7 @@ public class POCController {
         add("tourism");
     }};
 
-    private static Set<String> EXCLUDE_FEATURES = new HashSet<>() {{
+    protected static Set<String> EXCLUDE_FEATURES = new HashSet<>() {{
         add("yes");
         add("no");
         add("roof");
@@ -70,22 +69,14 @@ public class POCController {
         add("stable");
     }};
 
-    private static String TAG_VAL_PATTERN = "[a-zA-Z_\\-]*";
+    protected static String TAG_VAL_PATTERN = "[a-zA-Z_\\-]*";
 
-    OSHDBH2 oshdb;
+    protected OSHDBH2 oshdb;
+    protected TagTranslator tagTranslator = null;
+    protected MapReducer<OSMEntitySnapshot> view = null;
 
-    /**
-     * One timestamp, a type of tag
-     */
-    @RequestMapping(value = "test", method = RequestMethod.GET)
-    public void poc() {
-        logger.info("Hit");
-        System.out.println("Hit");
-        Map<String, Object> geometryMap = null;
-        MapReducer<OSMEntitySnapshot> view = null;
-        TagTranslator tagTranslator = null;
-        List<ZoneTagData> allTimeZoneTagWayData = new ArrayList<>();
-        List<ZoneTagData> allTimeZoneTagNodeData = new ArrayList<>();
+
+    public POCController() {
         try {
             logger.info("Init DB");
             oshdb = new OSHDBH2(DB_PATH);
@@ -96,6 +87,19 @@ public class POCController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * One timestamp, a type of tag
+     */
+    @RequestMapping(value = "test", method = RequestMethod.GET)
+    public void poc() {
+        logger.info("Hit");
+        System.out.println("Hit");
+        Map<String, Object> geometryMap = null;
+        List<ZoneTagData> allTimeZoneTagWayData = new ArrayList<>();
+        List<ZoneTagData> allTimeZoneTagNodeData = new ArrayList<>();
+
         try {
             logger.info("Parsing GEOJSON");
             String content = Files.readString(Paths.get(GEOJSON_PATH));
@@ -218,7 +222,7 @@ public class POCController {
         }
     }
 
-    private void aggTag(OSHDBTag tag, TagTranslator finalTagTranslator, ZoneTagData zoneTagData, OSMEntitySnapshot snapshot, boolean hasArea) {
+    protected void aggTag(OSHDBTag tag, TagTranslator finalTagTranslator, ZoneTagData zoneTagData, OSMEntitySnapshot snapshot, boolean hasArea) {
         OSMTag osmTag = finalTagTranslator.getOSMTagOf(tag.getKey(), tag.getValue());
         // check tag - if char
         // many tags
