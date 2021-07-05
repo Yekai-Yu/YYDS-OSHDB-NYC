@@ -79,11 +79,13 @@ public class POCController {
      */
     @RequestMapping(value = "test", method = RequestMethod.GET)
     public void poc() {
+        logger.info("Hit");
         Map<String, Object> geometryMap = null;
         MapReducer<OSMEntitySnapshot> view = null;
         TagTranslator tagTranslator = null;
         List<ZoneTagData> allTimeZoneTagData = new ArrayList<>();
         try {
+            logger.info("Init DB");
             oshdb = new OSHDBH2(DB_PATH);
             tagTranslator = new TagTranslator(oshdb.getConnection());
             view = OSMEntitySnapshotView.on(oshdb);
@@ -91,6 +93,7 @@ public class POCController {
             e.printStackTrace();
         }
         try {
+            logger.info("Parsing GEOJSON");
             String content = Files.readString(Paths.get(GEOJSON_PATH));
             JSONParser parser = new JSONParser();
             Object obj = parser.parse(content);
