@@ -7,8 +7,10 @@ import org.apache.ignite.IgniteDataStreamer;
 import org.apache.ignite.Ignition;
 import org.apache.ignite.cache.CacheMode;
 import org.apache.ignite.cluster.ClusterState;
+import org.apache.ignite.configuration.BinaryConfiguration;
 import org.apache.ignite.configuration.CacheConfiguration;
 import org.apache.ignite.configuration.IgniteConfiguration;
+import org.apache.ignite.logger.slf4j.Slf4jLogger;
 import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
 import org.apache.ignite.spi.discovery.tcp.ipfinder.s3.TcpDiscoveryS3IpFinder;
 import org.heigit.bigspatialdata.oshdb.api.db.OSHDBDatabase;
@@ -55,11 +57,11 @@ public class IgniteController extends POCController {
         spi.setIpFinder(ipFinder);
         IgniteConfiguration cfg = new IgniteConfiguration();
 
-//        cfg.setPeerClassLoadingEnabled(true);
-//        cfg.setIgniteInstanceName("OSHDB-Unit-Tests_" + rndPort);
-//        cfg.setBinaryConfiguration((new BinaryConfiguration()).setCompactFooter(false));
-//        cfg.setGridLogger(new Slf4jLogger());
-//        cfg.setWorkDirectory("/tmp");
+        cfg.setPeerClassLoadingEnabled(true);
+        cfg.setIgniteInstanceName("OSHDB-Unit-Tests_" + 8080);
+        cfg.setBinaryConfiguration((new BinaryConfiguration()).setCompactFooter(false));
+        cfg.setGridLogger(new Slf4jLogger());
+        cfg.setWorkDirectory("/tmp");
 
         // Override default discovery SPI.
         cfg.setDiscoverySpi(spi);
