@@ -1,7 +1,6 @@
 package com.yyds.ccc.osmtlc.oshdb;
 
 import com.google.gson.Gson;
-import org.apache.commons.lang3.StringUtils;
 import org.heigit.bigspatialdata.oshdb.api.db.OSHDBH2;
 import org.heigit.bigspatialdata.oshdb.api.mapreducer.MapReducer;
 import org.heigit.bigspatialdata.oshdb.api.mapreducer.OSMEntitySnapshotView;
@@ -33,6 +32,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -61,11 +61,15 @@ public class POCController {
 
     private static Set<String> EXCLUDE_FEATURES = new HashSet<>() {{
         add("yes");
+        add("no");
         add("roof");
         add("ce");
         add("1ye");
         add("displaced_threshold");
+        add("stable");
     }};
+
+    private static String TAG_VAL_PATTERN = "[a-zA-Z_\\-]*";
 
     OSHDBH2 oshdb;
 
@@ -91,7 +95,6 @@ public class POCController {
             Object obj = parser.parse(content);
             geometryMap = (Map<String, Object>) obj;
             JSONArray features = (JSONArray) geometryMap.get("features");
-            Map<G, Integer> countMap = new HashMap<>();
 
             MapReducer<OSMEntitySnapshot> finalView1 = view;
             TagTranslator finalTagTranslator1 = tagTranslator;
@@ -117,8 +120,8 @@ public class POCController {
 
                 // one zone, at one time
                 LocalDate start = LocalDate.of(2014, 1, 1);
-                LocalDate end = LocalDate.of(2020, 12, 31);
-//                LocalDate end = LocalDate.of(2014, 1, 15);
+//                LocalDate end = LocalDate.of(2020, 12, 31);
+                LocalDate end = LocalDate.of(2014, 1, 15);
 
                 Stream<LocalDate> dates = start.datesUntil(end.plusDays(1), Period.ofMonths(1));
                 List<String> dateList = dates.map(LocalDate::toString).collect(Collectors.toList());
@@ -132,30 +135,11 @@ public class POCController {
                             try {
                                 finalView.areaOfInterest(geometryJTS)
                                         .timestamps(time)
-                                        .osmType(OSMType.WAY)
+                                        .osmType(OSMType.WAY, OSMType.NODE)
                                         .forEach(snapshot -> {
                                             Iterable<OSHDBTag> tagList = snapshot.getEntity().getTags();
                                             tagList.forEach(tag -> {
-                                                OSMTag osmTag = finalTagTranslator.getOSMTagOf(tag.getKey(), tag.getValue());
-                                                // check tag - if char
-                                                // many tags
-                                                if (PRIMARY_FEATURES.contains(osmTag.getKey()) && StringUtils.isAlpha(osmTag.getValue())) {
-                                                    zoneTagData.getTagSet().add(osmTag);
-
-                                                    Double area = snapshot.getGeometry().getArea();
-                                                    List<Double> areaList = zoneTagData.getFeatureMap().getOrDefault(osmTag.getValue(), new ArrayList<>());
-                                                    // ignore area=0
-                                                    if (area != 0) {
-                                                        if (areaList.isEmpty()) {
-                                                            areaList.add(1.0);
-                                                            areaList.add(area);
-                                                        } else {
-                                                            areaList.set(0, areaList.get(0) + 1.0);
-                                                            areaList.set(1, areaList.get(1) + area);
-                                                        }
-                                                        zoneTagData.getFeatureMap().put(osmTag.getValue(), areaList);
-                                                    }
-                                                }
+                                                aggTag(tag, finalTagTranslator, zoneTagData, snapshot);
                                             });
                                         });
                             } catch (Exception e) {
@@ -192,4 +176,28 @@ public class POCController {
         }
     }
 
+    private void aggTag(OSHDBTag tag, TagTranslator finalTagTranslator, ZoneTagData zoneTagData, OSMEntitySnapshot snapshot) {
+        OSMTag osmTag = finalTagTranslator.getOSMTagOf(tag.getKey(), tag.getValue());
+        // check tag - if char
+        // many tags
+        // filter excluded tag val
+        boolean matcher = Pattern.matches(TAG_VAL_PATTERN, osmTag.getValue());
+        if (PRIMARY_FEATURES.contains(osmTag.getKey()) && matcher && !EXCLUDE_FEATURES.contains(osmTag.getValue())) {
+            zoneTagData.getTagSet().add(osmTag);
+
+            Double area = snapshot.getGeometry().getArea();
+            List<Double> areaList = zoneTagData.getFeatureMap().getOrDefault(osmTag.getValue(), new ArrayList<>());
+            // ignore area=0
+            if (area != 0) {
+                if (areaList.isEmpty()) {
+                    areaList.add(1.0);
+                    areaList.add(area);
+                } else {
+                    areaList.set(0, areaList.get(0) + 1.0);
+                    areaList.set(1, areaList.get(1) + area);
+                }
+                zoneTagData.getFeatureMap().put(osmTag.getValue(), areaList);
+            }
+        }
+    }
 }
