@@ -41,7 +41,7 @@ public class POCController {
 
     Logger logger = LoggerFactory.getLogger(POCController.class);
 
-    private static String DIR = "/Users/yekaiyu/Desktop/CS 598 Cloud Computing Capstone/Research Project/Main";
+    private static String DIR = "/home/ec2-user";
     private static String DB_PATH = DIR + "/us_2021-01-06.oshdb.mv.db";
     private static String GEOJSON_PATH = DIR + "/NYC Taxi Zones.geojson";
 
