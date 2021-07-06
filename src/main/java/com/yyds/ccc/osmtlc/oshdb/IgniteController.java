@@ -82,19 +82,28 @@ public class IgniteController extends POCController {
         Ignite ignite = ((OSHDBIgnite) this.oshdb).getIgnite();
         ignite.cluster().state(ClusterState.ACTIVE);
 
-        CacheConfiguration<Long, GridOSHNodes> cacheCfg =
+        CacheConfiguration<Long, GridOSHNodes> nodeCacheCfg =
                 new CacheConfiguration<>(TableNames.T_NODES.toString(prefix));
-        cacheCfg.setStatisticsEnabled(true);
-        cacheCfg.setBackups(0);
-        cacheCfg.setCacheMode(CacheMode.PARTITIONED);
-        IgniteCache<Long, GridOSHNodes> cache = ignite.getOrCreateCache(cacheCfg);
-        cache.clear();
+//        nodeCacheCfg.setStatisticsEnabled(true);
+        nodeCacheCfg.setBackups(0);
+        nodeCacheCfg.setCacheMode(CacheMode.PARTITIONED);
+        IgniteCache<Long, GridOSHNodes> nodeCache = ignite.getOrCreateCache(nodeCacheCfg);
+        nodeCache.clear();
+
+        CacheConfiguration<Long, GridOSHNodes> wayCacheCfg =
+                new CacheConfiguration<>(TableNames.T_WAYS.toString(prefix));
+//        wayCacheCfg.setStatisticsEnabled(true);
+        wayCacheCfg.setBackups(0);
+        wayCacheCfg.setCacheMode(CacheMode.PARTITIONED);
+        IgniteCache<Long, GridOSHNodes> wayCache = ignite.getOrCreateCache(wayCacheCfg);
+        wayCache.clear();
+
         // dummy caches for ways+relations (at the moment we don't use them in the actual TestMapReduce)
-        ignite.getOrCreateCache(new CacheConfiguration<>(TableNames.T_WAYS.toString(prefix)));
-        ignite.getOrCreateCache(new CacheConfiguration<>(TableNames.T_RELATIONS.toString(prefix)));
+//        ignite.getOrCreateCache(new CacheConfiguration<>(TableNames.T_WAYS.toString(prefix)));
+//        ignite.getOrCreateCache(new CacheConfiguration<>(TableNames.T_RELATIONS.toString(prefix)));
 
         // load test data into ignite cache
-        try (IgniteDataStreamer<Long, GridOSHNodes> streamer = ignite.dataStreamer(cache.getName())) {
+        try (IgniteDataStreamer<Long, GridOSHNodes> streamer = ignite.dataStreamer(nodeCache.getName())) {
             Connection h2Conn = oshdbH2.getConnection();
             Statement h2Stmt = h2Conn.createStatement();
 
@@ -102,6 +111,32 @@ public class IgniteController extends POCController {
 
             try (final ResultSet rst =
                          h2Stmt.executeQuery("select level, id, data from " + TableNames.T_NODES.toString())) {
+                while (rst.next()) {
+                    final int level = rst.getInt(1);
+                    final long id = rst.getLong(2);
+                    final ObjectInputStream ois = new ObjectInputStream(rst.getBinaryStream(3));
+                    final GridOSHNodes grid = (GridOSHNodes) ois.readObject();
+
+                    streamer.addData(CellId.getLevelId(level, id), grid);
+                }
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+
+            }
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+
+        }
+
+        try (IgniteDataStreamer<Long, GridOSHNodes> streamer = ignite.dataStreamer(wayCache.getName())) {
+            Connection h2Conn = oshdbH2.getConnection();
+            Statement h2Stmt = h2Conn.createStatement();
+
+            streamer.allowOverwrite(true);
+
+            try (final ResultSet rst =
+                         h2Stmt.executeQuery("select level, id, data from " + TableNames.T_WAYS.toString())) {
                 while (rst.next()) {
                     final int level = rst.getInt(1);
                     final long id = rst.getLong(2);
