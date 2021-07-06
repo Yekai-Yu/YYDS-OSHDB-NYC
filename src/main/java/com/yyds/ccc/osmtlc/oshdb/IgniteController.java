@@ -144,7 +144,7 @@ public class IgniteController extends POCController {
                     final int level = rst.getInt(1);
                     final long id = rst.getLong(2);
                     final ObjectInputStream ois = new ObjectInputStream(rst.getBinaryStream(3));
-                    final GridOSHNodes grid = (GridOSHNodes) ois.readObject();
+                    final GridOSHWays grid = (GridOSHWays) ois.readObject();
 
                     streamer.addData(CellId.getLevelId(level, id), grid);
                 }
