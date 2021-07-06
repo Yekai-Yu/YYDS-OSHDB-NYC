@@ -103,6 +103,7 @@ public class IgniteController extends POCController {
 //        ignite.getOrCreateCache(new CacheConfiguration<>(TableNames.T_RELATIONS.toString(prefix)));
 
         // load test data into ignite cache
+        logger.info("Loading Node cache");
         try (IgniteDataStreamer<Long, GridOSHNodes> streamer = ignite.dataStreamer(nodeCache.getName())) {
             Connection h2Conn = oshdbH2.getConnection();
             Statement h2Stmt = h2Conn.createStatement();
@@ -129,6 +130,7 @@ public class IgniteController extends POCController {
 
         }
 
+        logger.info("Loading Way cache");
         try (IgniteDataStreamer<Long, GridOSHNodes> streamer = ignite.dataStreamer(wayCache.getName())) {
             Connection h2Conn = oshdbH2.getConnection();
             Statement h2Stmt = h2Conn.createStatement();
