@@ -57,19 +57,20 @@ public class IgniteController extends POCController {
         spi.setIpFinder(ipFinder);
         IgniteConfiguration cfg = new IgniteConfiguration();
 
-        cfg.setPeerClassLoadingEnabled(true);
-        cfg.setIgniteInstanceName("OSHDB-Unit-Tests_" + 8080);
-        cfg.setBinaryConfiguration((new BinaryConfiguration()).setCompactFooter(false));
-        cfg.setGridLogger(new Slf4jLogger());
-        cfg.setWorkDirectory("/tmp");
+//        cfg.setPeerClassLoadingEnabled(true);
+//        cfg.setIgniteInstanceName("OSHDB-Unit-Tests_" + 8080);
+//        cfg.setBinaryConfiguration((new BinaryConfiguration()).setCompactFooter(false));
+//        cfg.setGridLogger(new Slf4jLogger());
+//        cfg.setWorkDirectory("/tmp");
         cfg.setClientMode(true);
 
         // Override default discovery SPI.
         cfg.setDiscoverySpi(spi);
 
         // Start a node.
-        ignite = Ignition.start("/home/ec2-user/aws-s3-ip-finder.xml");
-//        ignite = Ignition.start(cfg);
+
+//        ignite = Ignition.start("/home/ec2-user/aws-s3-ip-finder.xml");
+        ignite = Ignition.start(cfg);
 
         oshdb = new OSHDBIgnite(ignite).computeMode(OSHDBIgnite.ComputeMode.LocalPeek);
         final String prefix = "tests";
