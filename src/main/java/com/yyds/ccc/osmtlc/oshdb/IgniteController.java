@@ -68,7 +68,8 @@ public class IgniteController extends POCController {
         cfg.setDiscoverySpi(spi);
 
         // Start a node.
-        ignite = Ignition.start(cfg);
+        ignite = Ignition.start("/home/ec2-user/aws-s3-ip-finder.xml");
+//        ignite = Ignition.start(cfg);
 
         oshdb = new OSHDBIgnite(ignite).computeMode(OSHDBIgnite.ComputeMode.LocalPeek);
         final String prefix = "tests";
