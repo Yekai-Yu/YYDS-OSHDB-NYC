@@ -19,6 +19,7 @@ import org.heigit.bigspatialdata.oshdb.api.db.OSHDBIgnite;
 import org.heigit.bigspatialdata.oshdb.api.db.OSHDBJdbc;
 import org.heigit.bigspatialdata.oshdb.api.mapreducer.OSMEntitySnapshotView;
 import org.heigit.bigspatialdata.oshdb.grid.GridOSHNodes;
+import org.heigit.bigspatialdata.oshdb.grid.GridOSHWays;
 import org.heigit.bigspatialdata.oshdb.util.CellId;
 import org.heigit.bigspatialdata.oshdb.util.TableNames;
 import org.heigit.bigspatialdata.oshdb.util.tagtranslator.TagTranslator;
@@ -131,7 +132,7 @@ public class IgniteController extends POCController {
         }
 
         logger.info("Loading Way cache");
-        try (IgniteDataStreamer<Long, GridOSHNodes> streamer = ignite.dataStreamer(wayCache.getName())) {
+        try (IgniteDataStreamer<Long, GridOSHWays> streamer = ignite.dataStreamer(wayCache.getName())) {
             Connection h2Conn = oshdbH2.getConnection();
             Statement h2Stmt = h2Conn.createStatement();
 
