@@ -130,6 +130,7 @@ public class IgniteController extends POCController {
             e.printStackTrace();
 
         }
+        nodeCache.clear();
 
         logger.info("Loading Way cache");
         try (IgniteDataStreamer<Long, GridOSHWays> streamer = ignite.dataStreamer(wayCache.getName())) {
@@ -157,6 +158,8 @@ public class IgniteController extends POCController {
             e.printStackTrace();
 
         }
+        wayCache.clear();
+
 
         ignite.cluster().state(ClusterState.ACTIVE_READ_ONLY);
 
