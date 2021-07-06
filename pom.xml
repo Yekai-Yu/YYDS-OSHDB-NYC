@@ -15,6 +15,7 @@
     <properties>
         <java.version>11</java.version>
         <gridgain.version>8.8.6</gridgain.version>
+        <h2.version>1.4.197</h2.version>
     </properties>
     <repositories>
         <repository>
@@ -112,6 +113,12 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-s3</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>${h2.version}</version>
         </dependency>
 
     </dependencies>
