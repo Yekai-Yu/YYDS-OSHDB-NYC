@@ -30,3 +30,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### DL Code ###
+/dl/*.txt
+/dl/*.csv
