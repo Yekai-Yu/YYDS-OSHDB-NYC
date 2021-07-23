@@ -9,7 +9,8 @@ public class CoordinateProcessor {
     public static void main(String[] args) throws Exception {
         Logger logger = LoggerFactory.getLogger(CoordinateProcessor.class);
         CoordinateLocator coordinateLocator = new CoordinateLocator();
-        String DIR = "home/ec2-user/coordinate-trip-data/";
+        String DIR = "/home/ec2-user/coordinate-trip-data/";
+//        String DIR = "/Users/yekaiyu/Desktop/CS 598 Cloud Computing Capstone/Research Project/Main";
         File dir = new File(DIR);
         // coordinate-trip-data/
         File[] dirs = dir.listFiles();
