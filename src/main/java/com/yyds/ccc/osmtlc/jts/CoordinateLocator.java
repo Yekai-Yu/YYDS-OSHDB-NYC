@@ -109,51 +109,56 @@ public class CoordinateLocator {
                     continue;
                 }
                 ++totalCounter;
-                Double pickUpLong = Double.parseDouble(record.get(PICK_UP_LONG));
-                Double pickUpLat = Double.parseDouble(record.get(PICK_UP_LAT));
-                Double dropOffLong = Double.parseDouble(record.get(DROP_OFF_LONG));
-                Double dropOffLat = Double.parseDouble(record.get(DROP_OFF_LAT));
+                try {
+                    Double pickUpLong = Double.parseDouble(record.get(PICK_UP_LONG));
+                    Double pickUpLat = Double.parseDouble(record.get(PICK_UP_LAT));
+                    Double dropOffLong = Double.parseDouble(record.get(DROP_OFF_LONG));
+                    Double dropOffLat = Double.parseDouble(record.get(DROP_OFF_LAT));
 
-                Coordinate pickUp = new Coordinate(pickUpLong, pickUpLat);
-                Coordinate dropOff = new Coordinate(dropOffLong, dropOffLat);
 
-                GeometryFactory geometryFactory1 = new GeometryFactory();
-                Point pickUpPoint = geometryFactory1.createPoint(pickUp);
-                GeometryFactory geometryFactory2 = new GeometryFactory();
-                Point dropOffPoint = geometryFactory2.createPoint(dropOff);
+                    Coordinate pickUp = new Coordinate(pickUpLong, pickUpLat);
+                    Coordinate dropOff = new Coordinate(dropOffLong, dropOffLat);
 
-                int pickUpZone = -1;
-                int dropOffZone = -1;
-                boolean foundP = false;
-                boolean foundD = false;
-                for (Polygon zone : zoneMap.keySet()) {
-                    if (!foundP && pickUpPoint.within(zone)) {
-                        pickUpZone = zoneMap.get(zone);
-                        foundP = true;
+                    GeometryFactory geometryFactory1 = new GeometryFactory();
+                    Point pickUpPoint = geometryFactory1.createPoint(pickUp);
+                    GeometryFactory geometryFactory2 = new GeometryFactory();
+                    Point dropOffPoint = geometryFactory2.createPoint(dropOff);
+
+                    int pickUpZone = -1;
+                    int dropOffZone = -1;
+                    boolean foundP = false;
+                    boolean foundD = false;
+                    for (Polygon zone : zoneMap.keySet()) {
+                        if (!foundP && pickUpPoint.within(zone)) {
+                            pickUpZone = zoneMap.get(zone);
+                            foundP = true;
+                        }
+                        if (!foundD && dropOffPoint.within(zone)) {
+                            dropOffZone = zoneMap.get(zone);
+                            foundD = true;
+                        }
+                        if (foundP && foundD) {
+                            break;
+                        }
                     }
-                    if (!foundD && dropOffPoint.within(zone)) {
-                        dropOffZone = zoneMap.get(zone);
-                        foundD = true;
+                    if (pickUpZone == -1 || dropOffZone == -1) {
+                        continue;
                     }
-                    if (foundP && foundD) {
-                        break;
-                    }
+                    printer.printRecord(
+                            record.get("pickup_datetime"),
+                            record.get("dropoff_datetime"),
+                            record.get("passenger_count"),
+                            record.get("trip_distance"),
+                            pickUpZone,
+                            dropOffZone,
+                            record.get("fare_amount"),
+                            record.get("surcharge"),
+                            record.get("tolls_amount"),
+                            record.get("total_amount"));
+                    ++processedCounter;
+                } catch (Exception e) {
+                    logger.info("Error record, moving on...", e);
                 }
-                if (pickUpZone == -1 || dropOffZone == -1) {
-                    continue;
-                }
-                printer.printRecord(
-                        record.get("pickup_datetime"),
-                        record.get("dropoff_datetime"),
-                        record.get("passenger_count"),
-                        record.get("trip_distance"),
-                        pickUpZone,
-                        dropOffZone,
-                        record.get("fare_amount"),
-                        record.get("surcharge"),
-                        record.get("tolls_amount"),
-                        record.get("total_amount"));
-                ++processedCounter;
             }
             logger.info("Total records: {}, processed records: {}", totalCounter, processedCounter);
         } catch (IOException ex) {
