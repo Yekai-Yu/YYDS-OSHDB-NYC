@@ -13,7 +13,7 @@
     <name>osmtlc</name>
     <description>CS 598 CCC YYDS Team Project - OSM TLC</description>
     <properties>
-        <java.version>11</java.version>
+        <java.version>8</java.version>
         <gridgain.version>8.8.6</gridgain.version>
         <h2.version>1.4.197</h2.version>
     </properties>
