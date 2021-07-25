@@ -9,29 +9,7 @@ public class CoordinateProcessor {
     public static void main(String[] args) throws Exception {
         Logger logger = LoggerFactory.getLogger(CoordinateProcessor.class);
         CoordinateLocator coordinateLocator = new CoordinateLocator();
-//        String DIR = "/home/ec2-user/coordinate-trip-data/";
-////        String DIR = "/Users/yekaiyu/Desktop/CS 598 Cloud Computing Capstone/Research Project/Main";
-//        File dir = new File(DIR);
-//        // coordinate-trip-data/
-//        File[] dirs = dir.listFiles();
-//        for (File subDir : dirs) {
-//            // green_tripdata_2014-total/
-//            logger.info("=====================================");
-//            logger.info("In {}", subDir.getCanonicalPath());
-//            if (subDir.isDirectory()) {
-//                File[] files = subDir.listFiles();
-//                for (File file : files) {
-//                    if (file.isFile() && file.getAbsolutePath().endsWith(".csv")) {
-//                        logger.info(".......................");
-//                        logger.info("Processing {}", file.getCanonicalPath());
-//                        coordinateLocator.process(file);
-//                        logger.info("Done {}", file.getCanonicalPath());
-//                    }
-//                }
-//            }
-//        }
-
-        String DIR = "/home/ec2-user/coordinate-trip-data/yellow_tripdata_2016-total/";
+//        String DIR = "/home/ec2-user/coordinate-trip-data/yellow_tripdata_2016-total/";
         String[] unprocessedFiles = {
             "part-00046-8c8838e8-8eb6-48bc-8f86-42b3496ccdca-c000.csv",
             "part-00047-8c8838e8-8eb6-48bc-8f86-42b3496ccdca-c000.csv",
@@ -107,13 +85,36 @@ public class CoordinateProcessor {
             "part-00122-8c8838e8-8eb6-48bc-8f86-42b3496ccdca-c000.csv",
             "part-00123-8c8838e8-8eb6-48bc-8f86-42b3496ccdca-c000.csv"
         };
-        for (String fileName : unprocessedFiles) {
-            File file = new File(DIR + fileName);
-            logger.info(".......................");
-            logger.info("Processing {}", file.getCanonicalPath());
-            coordinateLocator.process(file);
-            logger.info("Done {}", file.getCanonicalPath());
+//        for (String fileName : unprocessedFiles) {
+//            File file = new File(DIR + fileName);
+//            logger.info(".......................");
+//            logger.info("Processing {}", file.getCanonicalPath());
+//            coordinateLocator.process(file);
+//            logger.info("Done {}", file.getCanonicalPath());
+//        }
+
+        String DIR = "/home/ec2-user/cleaned-nyc-tlc-trip-data/";
+//        String DIR = "/Users/yekaiyu/Desktop/CS 598 Cloud Computing Capstone/Research Project/Main";
+        File dir = new File(DIR);
+        // cleaned-nyc-tlc-trip-data//
+        File[] dirs = dir.listFiles();
+        for (File subDir : dirs) {
+            // green_tripdata_2014-total/
+            logger.info("=====================================");
+            logger.info("In {}", subDir.getCanonicalPath());
+            if (subDir.isDirectory()) {
+                File[] files = subDir.listFiles();
+                for (File file : files) {
+                    if (file.isFile() && file.getAbsolutePath().endsWith(".csv")) {
+                        logger.info(".......................");
+                        logger.info("Processing {}", file.getCanonicalPath());
+                        coordinateLocator.process(file);
+                        logger.info("Done {}", file.getCanonicalPath());
+                    }
+                }
+            }
         }
+
         logger.info("Complete.");
     }
 }

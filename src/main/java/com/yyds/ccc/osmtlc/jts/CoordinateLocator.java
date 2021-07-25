@@ -157,7 +157,7 @@ public class CoordinateLocator {
                             record.get("total_amount"));
                     ++processedCounter;
                 } catch (Exception e) {
-                    logger.info("Error record, moving on...", e);
+//                    logger.info("Error record, moving on...", e);
                 }
             }
             logger.info("Total records: {}, processed records: {}", totalCounter, processedCounter);
