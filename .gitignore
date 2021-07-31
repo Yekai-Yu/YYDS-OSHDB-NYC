@@ -33,4 +33,6 @@ build/
 
 ### DL Code ###
 /dl/*.txt
-/dl/*.csv
+/dl/Round*
+/dl/out-of-date
+
