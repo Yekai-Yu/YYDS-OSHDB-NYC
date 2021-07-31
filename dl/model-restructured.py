@@ -16,7 +16,7 @@ random.seed(seed)
 np.random.seed(seed)
 torch.manual_seed(seed)
 os.environ["PYTHONHASHSEED"] = str(seed)
-N_feature = 19 + 1012
+N_feature = 19 + 1013
 BATCH_SIZE = 16
 N_EPOCH = 50
 PRINT_INTERVAL = 1000
@@ -33,16 +33,9 @@ class Dataset(Dataset):
                 continue
             l = line.strip('\n').split(",")
             ## y
-            self.y.append([float(x) for x in l[4:12]])
+            self.y.append([float(x) for x in l[:8]])
             ## x
-            time = [0]*19
-            year = int(l[1])
-            month = int(l[2])
-            weekday = int(l[3])
-            time[year-2014] = 1
-            time[month-1+6] = 1
-            time[-1] = weekday
-            inp = time+[float(x) for x in (l[12:len(l)])]
+            inp = [float(x) for x in (l[8:])]
             self.x.append(inp)
 
     def __len__(self):
@@ -160,9 +153,9 @@ def eval_model(epoch, model, test_loader, logfile, setstr):
             log.write("batch: {}\n".format(i))
             print("batch: {}".format(i))
 
-        if i==0 and setstr!="validation":
+        """if i==0 and setstr!="validation":
             print(y)
-            print(y_hat)
+            print(y_hat)"""
 
     t2 = time.time()
     test_loss = test_loss / len(test_loader)
